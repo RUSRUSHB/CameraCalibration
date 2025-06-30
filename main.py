@@ -5,11 +5,21 @@ from ExtrinsicCalibration import ExCalibrator
 from IntrinsicCalibration import InCalibrator, CalibMode
 from SurroundBirdEyeView import BevGenerator
 
+CASE_DICT = {
+    'default': {
+        'input_path': './IntrinsicCalibration/data/default/',
+        'img_raw0': './IntrinsicCalibration/data/default/img_raw0.jpg',
+        'img_src_back': './ExtrinsicCalibration/data/default/img_src_back.jpg',
+        'img_dst_back': './ExtrinsicCalibration/data/default/img_dst_back.jpg',
+    }
+    
+}
+
 
 def runInCalib_1():
     print("Intrinsic Calibration ......")
     calibrator = InCalibrator('fisheye')                # 初始化内参标定器
-    PATH = './IntrinsicCalibration/data/'
+    PATH = './IntrinsicCalibration/data/default/'
     images = os.listdir(PATH)
     for img in images:
         print(PATH + img)
@@ -20,7 +30,7 @@ def runInCalib_1():
     print("Distortion Coefficient is : {}".format(result.dist_coeff.tolist()))
     print("Reprojection Error is : {}".format(np.mean(result.reproj_err)))
 
-    raw_frame = cv2.imread('./IntrinsicCalibration/data/img_raw0.jpg')
+    raw_frame = cv2.imread('./IntrinsicCalibration/data/default/img_raw0.jpg')
     cv2.imshow("Raw Image", raw_frame)
     undist_img = calibrator.undistort(raw_frame)        # 使用undistort方法得到去畸变图像
     cv2.imshow("Undistorted Image", undist_img)
@@ -30,7 +40,7 @@ def runInCalib_1():
 def runInCalib_2():
     print("Intrinsic Calibration ......")
     args = InCalibrator.get_args()                      # 获取内参标定args参数
-    args.INPUT_PATH = './IntrinsicCalibration/data/'    # 修改为新的参数
+    args.INPUT_PATH = './IntrinsicCalibration/data/default/'    # 修改为新的参数
     calibrator = InCalibrator('fisheye')                # 初始化内参标定器
     calib = CalibMode(calibrator, 'image', 'auto')      # 选择标定模式
     result = calib()                                    # 开始标定
@@ -39,7 +49,7 @@ def runInCalib_2():
     print("Distortion Coefficient is : {}".format(result.dist_coeff.tolist()))
     print("Reprojection Error is : {}".format(np.mean(result.reproj_err)))
 
-    raw_frame = cv2.imread('./IntrinsicCalibration/data/img_raw0.jpg')
+    raw_frame = cv2.imread('./IntrinsicCalibration/data/default/img_raw0.jpg')
     # calibrator.draw_corners(raw_frame)                  # 画出角点
     cv2.imshow("Raw Image", raw_frame)
     undist_img = calibrator.undistort(raw_frame)        # 使用undistort方法得到去畸变图像
@@ -51,8 +61,8 @@ def runExCalib():
     print("Extrinsic Calibration ......")
     exCalib = ExCalibrator()                            # 初始化外参标定器
 
-    src_raw = cv2.imread('./ExtrinsicCalibration/data/img_src_back.jpg')
-    dst_raw = cv2.imread('./ExtrinsicCalibration/data/img_dst_back.jpg')
+    src_raw = cv2.imread('./ExtrinsicCalibration/data/default/img_src_back.jpg')
+    dst_raw = cv2.imread('./ExtrinsicCalibration/data/default/img_dst_back.jpg')
 
     homography = exCalib(src_raw, dst_raw)              # 输入对应的两张去畸变图像 得到单应性矩阵
     print("Homography Matrix is:")
@@ -92,7 +102,7 @@ def main():
     # runInCalib_1()
     runInCalib_2()
     runExCalib()
-    runBEV()
+    # runBEV()
 
 if __name__ == '__main__':
     main()
