@@ -179,13 +179,22 @@ class InCalibrator:
     def get_corners(self, img):
         ok, corners = cv2.findChessboardCorners(img, (args.BOARD_WIDTH, args.BOARD_HEIGHT),
                       flags = cv2.CALIB_CB_ADAPTIVE_THRESH|cv2.CALIB_CB_NORMALIZE_IMAGE|cv2.CALIB_CB_FAST_CHECK)
-        print(f'BOARD_WIDTH: {args.BOARD_WIDTH}, BOARD_HEIGHT: {args.BOARD_HEIGHT}, corners found: {ok}')
         if ok: 
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            corners = cv2.cornerSubPix(gray, corners, (args.SUBPIX_REGION, args.SUBPIX_REGION), (-1, -1),
-                                       (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.01))
+            corners = cv2.cornerSubPix(image=gray, 
+                                     corners=corners, 
+                                     winSize=(args.SUBPIX_REGION, args.SUBPIX_REGION),
+                                     zeroZone=(-1, -1),
+                                     criteria=(cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.01))
         else:
-            print("Warning: Chessboard corners not found in the image.")
+            # 调整窗口大小以便查看
+            cv2.namedWindow("Corners not found", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("Corners not found", 800, 600)  # 设置合适的窗口大小
+            cv2.imshow("Corners not found", img)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+            print(f'Corners not found!')
+            # raise Exception("Error: Chessboard corners not found in the image.")
         return ok, corners
     
     def draw_corners(self, img):
@@ -249,7 +258,7 @@ class CalibMode():
     def runCalib(self, raw_frame, display_raw=True, display_undist=True):
         calibrator = self.calibrator
         raw_frame = self.imgPreprocess(raw_frame)
-        cv2.imshow("raw_frame", raw_frame)
+        # cv2.imshow("raw_frame", raw_frame)
         result = calibrator(raw_frame)
         raw_frame = calibrator.draw_corners(raw_frame)
         if display_raw:
